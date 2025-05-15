@@ -18,6 +18,13 @@ Key features include:
 - **Hardware:** Raspberry Pi with HiFiBerry audio modules, Arduino microcontrollers, capacitive sensing electrodes  
 - **Software:** Python and C++ for signal processing and AI models, custom DSP algorithms for audio synthesis  
 
+## Useful Links
+
+- [Tech Webpage](https://luciamarock.github.io/Projects/SoundingCanvas.html)
+- [Art Webpage](https://doramoteque-faf94c.webflow.io/sounding-canvas)
+- [Youtube Videos](https://www.youtube.com/@doradynamicdesign)
+- [IG Videos](https://www.instagram.com/doramoteque/)
+
 ## Licensing
 
 ### Media and Documentation
