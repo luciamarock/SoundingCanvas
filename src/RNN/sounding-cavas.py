@@ -115,6 +115,7 @@ class MachineAnswer:
         sound_range_start = (self.current_channel_ID - 1) * self.sounds_per_channel + 1
         sound_range_end = sound_range_start + self.sounds_per_channel
         #print("-------------- loop begins -----------------")
+        possible_solutions = []
         for candidate_sound in range(sound_range_start, sound_range_end):
             # For now, assume delta_t = 0 for machine-generated sound
             h_sound_ids = self.history["sound_ids"].copy()
@@ -123,6 +124,9 @@ class MachineAnswer:
             h_delta_ts.append(self.candidate_delta_t) #hypotetical
             probs = self._predict_next_channel(h_sound_ids,h_delta_ts)
             #print(f"channel probabilities for candidate sound {candidate_sound} are {probs}")
+            max_index = np.argmax(probs)
+            if max_index + 1 == goal_channel_id:
+                possible_solutions.append(candidate_sound)
             prob_goal = probs[goal_channel_id - 1]
             #print(f"probability of channel goal {goal_channel_id} is {prob_goal}")
             if prob_goal > best_prob:
@@ -130,11 +134,12 @@ class MachineAnswer:
                 best_sound = candidate_sound
         #print("-------------- loop ends -----------------")
         #print("best sound is {} with probability to make the goal happen of {}".format(best_sound,best_prob))
-
-        self.history["sound_ids"].append(best_sound)
+        possible_solutions.append(best_sound)
+        final_selection = random.choice(possible_solutions)
+        self.history["sound_ids"].append(final_selection)
         self.history["delta_ts"].append(self.candidate_delta_t)
 
-        return best_sound
+        return final_selection
 
 if __name__ == "__main__":
     machine = MachineAnswer("next_touch_given_sounds.keras")
