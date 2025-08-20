@@ -140,9 +140,10 @@ if __name__ == "__main__":
     machine = MachineAnswer("next_touch_given_sounds.keras")
     start_time = time.time()
     current_time = time.time()
-    while current_time - start_time < 10:
+    while current_time - start_time < 120:
         channel_ID = random.randint(1,NUM_CHANNELS)
         sound_ID = machine.register_user_touch(channel_ID)
         print(f"machine answered with {sound_ID} to user touch at {channel_ID}")
-        time.sleep(1)
+        sleep_time = random.randint(1000,10000)
+        time.sleep(sleep_time/1000.)
         current_time = time.time()
