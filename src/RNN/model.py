@@ -41,7 +41,12 @@ class SessionDataset(tf.keras.utils.Sequence):
             events = session["events"] # list of {sound_id, delta_t, channel_id}
             for i, ev in enumerate(events):
                 # inputs = all past (sound_id, delta_t) up to this event
-                hist = [{"sound_id": e["sound_id"], "delta_t": e["delta_t"]} for e in events[:i+1]]
+                hist = [{
+                    "sound_id": e["sound_id"],
+                    "delta_t": e["delta_t"],
+                    "touch_time": e.get("touch_time", 0.0),
+                    "average_speed": e.get("average_speed", 0.0)
+                } for e in events[:i+1]]
                 # label = channel_id of this event
                 label = ev["channel_id"] - 1
                 samples.append((hist, label))
@@ -64,26 +69,32 @@ class SessionDataset(tf.keras.utils.Sequence):
         ensuring all sequences have the same length (max_seq_len) for the LSTM layer.
         """
         batch = self.samples[idx*self.batch_size : (idx+1)*self.batch_size]
-        X_sounds, X_times, y = [], [], []
+        X_sounds, X_features, y = [], [], []
         for hist, label in batch:
             sound_ids = [e["sound_id"] for e in hist]
-            delta_ts = [e["delta_t"] for e in hist]
+            features = [[e["delta_t"], e["touch_time"], e["average_speed"]] for e in hist]
             # pad or truncate sequences to max_seq_len
             pad_len = self.max_seq_len - len(sound_ids)
             if pad_len > 0:
                 # Pad with zeros at the beginning
                 sound_ids = [0]*pad_len + sound_ids
-                delta_ts = [0.0]*pad_len + delta_ts
+                features = [[0.0, 0.0, 0.0]]*pad_len + features
             else:
                 # Truncate from the beginning
                 sound_ids = sound_ids[-self.max_seq_len:]
-                delta_ts = delta_ts[-self.max_seq_len:]
+                features = features[-self.max_seq_len:]
             X_sounds.append(sound_ids)
-            X_times.append(delta_ts)
+            X_features.append(features)
             y.append(label)
         
         # The return value must be a tuple of (inputs, labels)
-        return (np.array(X_sounds, dtype=np.int32), np.array(X_times, dtype=np.float32)), np.array(y, dtype=np.int32)
+        return (
+            {
+                "sound_id": np.array(X_sounds, dtype=np.int32),
+                "features": np.array(X_features, dtype=np.float32)
+            },
+            np.array(y, dtype=np.int32)
+        )
 
 
 def build_model(vocab_size, embedding_dim=32, rnn_units=64, max_seq_len=50, num_channels=4, dropout_rate=0.2):
@@ -98,19 +109,15 @@ def build_model(vocab_size, embedding_dim=32, rnn_units=64, max_seq_len=50, num_
     """
     # Inputs
     sound_input = layers.Input(shape=(max_seq_len,), dtype="int32", name="sound_id")
-    time_input = layers.Input(shape=(max_seq_len,), dtype="float32", name="delta_t")
+    features_input = layers.Input(shape=(max_seq_len, 3), dtype="float32", name="features")
 
     # Embedding for sounds:  It converts each sound_id
     # into a dense vector representation that the model can learn from.
     sound_emb = layers.Embedding(vocab_size, embedding_dim, mask_zero=False)(sound_input)
 
-    # Expand time to (batch, seq, 1): The time data needs to be reshaped to
-    # match the rank of the embedding output so they can be concatenated.
-    time_feat = layers.Reshape((max_seq_len, 1))(time_input)
-
     # Concatenate embeddings + time: This combines the two feature streams
     # into a single vector for each step in the sequence.
-    x = layers.Concatenate(axis=-1)([sound_emb, time_feat])
+    x = layers.Concatenate(axis=-1)([sound_emb, features_input])
 
     # LSTM encoder: The LSTM layer processes the sequence data, learning
     x = layers.LSTM(rnn_units)(x) 
@@ -122,7 +129,7 @@ def build_model(vocab_size, embedding_dim=32, rnn_units=64, max_seq_len=50, num_
     out = layers.Dense(num_channels, activation="softmax")(x)
 
     # Create the model using the Functional API, which allows for multiple inputs.
-    model = tf.keras.Model(inputs=[sound_input, time_input], outputs=out)
+    model = tf.keras.Model(inputs=[sound_input, features_input], outputs=out)
     # The compilation settings (optimizer, loss, metrics) 
     model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
     #model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4), loss="sparse_categorical_crossentropy", metrics=["accuracy"])

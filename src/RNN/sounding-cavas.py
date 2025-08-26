@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Aug 19 09:54:29 2025
+This is the equivalent of event_manager.py in MarkovModel directory
 
 @author: luciamarock
 """
@@ -37,6 +38,8 @@ class MachineAnswer:
         self.history = {}
         self.history["sound_ids"] = []
         self.history["delta_ts"] = []
+        self.history["touch_times"] = []
+        self.history["touch_speeds"] = []
         self.channel_count = {}
         for i in range(NUM_CHANNELS):
             self.channel_count[str(i + 1)] = 0
@@ -47,8 +50,16 @@ class MachineAnswer:
         self.history = {}
         self.history["sound_ids"] = []
         self.history["delta_ts"] = []
+        self.history["touch_times"] = []
+        self.history["touch_speeds"] = []
         for i in range(NUM_CHANNELS):
             self.channel_count[str(i + 1)] = 0
+    
+    def _analyze_gesture(self):
+        #TODO implement this 
+        touch_time = random.uniform(2.0, 10.0)
+        average_speed =random.randint(0, 7)
+        return touch_time, average_speed
 
     def register_user_touch(self, channel_id):
         """
@@ -62,8 +73,8 @@ class MachineAnswer:
             self.reset_history()
         self.last_touch_time = time.time()
         self.channel_count[str(channel_id)] += 1
-        #print("user touched channel {}, computing sound ...".format(channel_id))
-        sound_to_play = self.decide_next_sound()
+        touch_time, touch_speed = self._analyze_gesture()
+        sound_to_play = self.decide_next_sound(touch_time, touch_speed)
         return sound_to_play
     
     def _create_goal(self):
@@ -76,7 +87,7 @@ class MachineAnswer:
                 self.reset_history()
         return channel_ID
 
-    def _predict_next_channel(self,sound_ids,delta_ts):
+    def _predict_next_channel(self, sound_ids, delta_ts, touch_times, avg_speeds):
         """
         Runs model prediction given a full history sequence.
         Returns a probability distribution over channels.
@@ -88,19 +99,27 @@ class MachineAnswer:
         if pad_len > 0:
             sound_ids = [0] * pad_len + sound_ids
             delta_ts = [0.0] * pad_len + delta_ts
+            touch_times = [0.0] * pad_len + touch_times
+            avg_speeds = [0.0] * pad_len + avg_speeds
         else:
             sound_ids = sound_ids[-self.max_seq_len:]
             delta_ts = delta_ts[-self.max_seq_len:]
+            touch_times = touch_times[-self.max_seq_len:]
+            avg_speeds = avg_speeds[-self.max_seq_len:]
+    
+        # Features: shape (seq_len, 3)
+        features = np.stack([delta_ts, touch_times, avg_speeds], axis=-1)
             
         # Create a batch of size 1 for prediction
         X_sounds = np.array([sound_ids])
-        X_times = np.array([delta_ts])
+        X_features = np.array([features])     # shape (1, seq_len, 3)
         
         # Model expects a tuple of inputs: (sounds, times)
-        probs = self.model.predict((X_sounds, X_times), verbose=0)[0] # shape (num_channels,)
+        probs = self.model.predict((X_sounds, X_features), verbose=0)[0] # shape (num_channels,)
+        
         return probs
 
-    def decide_next_sound(self):
+    def decide_next_sound(self,touch_time, touch_speed):
         """
         Decide which sound to play next to maximize
         the probability that the user touches goal_channel_id.
@@ -115,6 +134,8 @@ class MachineAnswer:
         sound_range_start = (self.current_channel_ID - 1) * self.sounds_per_channel + 1
         sound_range_end = sound_range_start + self.sounds_per_channel
         #print("-------------- loop begins -----------------")
+        self.history["touch_times"].append(touch_time)
+        self.history["touch_speeds"].append(touch_speed)
         possible_solutions = []
         for candidate_sound in range(sound_range_start, sound_range_end):
             # For now, assume delta_t = 0 for machine-generated sound
@@ -122,7 +143,9 @@ class MachineAnswer:
             h_sound_ids.append(candidate_sound) #hypotetical
             h_delta_ts = self.history["delta_ts"].copy()
             h_delta_ts.append(self.candidate_delta_t) #hypotetical
-            probs = self._predict_next_channel(h_sound_ids,h_delta_ts)
+            h_touch_times = self.history["touch_times"].copy()
+            h_touch_speeds = self.history["touch_speeds"].copy()
+            probs = self._predict_next_channel(h_sound_ids,h_delta_ts,h_touch_times,h_touch_speeds)
             #print(f"channel probabilities for candidate sound {candidate_sound} are {probs}")
             max_index = np.argmax(probs)
             if max_index + 1 == goal_channel_id:
