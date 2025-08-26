@@ -1,25 +1,30 @@
 import numpy as np
-import time
+import random 
 
 class WavesGenerator:
-    def __init__(self, number_of_channels, multiplier, amplitude):
-        f0 = 0.5  # Hz
-        self._amplitude = amplitude/2
-        self._frequencies = [f0 * (multiplier ** i) for i in range(number_of_channels)]
-        self._start_time = time.time()
+    def __init__(self):
+        self._sampling_frequency = 1000
+        self._frequency = 100
+        self._amplitude = 2
 
-    def generate_next_values(self):
-        current_time = time.time() - self._start_time
-        sine_values = [
-            int((np.sin(2 * np.pi * f * current_time) + 1) * self._amplitude)
-            for f in self._frequencies
-        ]
-        return sine_values
+    def generate_values(self,number_of_samples):
+        wave_values = []
+        for i in range(number_of_samples):
+            current_time = i / self._sampling_frequency
+            wave_values.append(np.sin(2 * np.pi * self._frequency * current_time + 1) * self._amplitude)
+    
+        return wave_values
 
-    def readline(self):
-        values = self.generate_next_values()
-        line = "\t".join(map(str, values)) + "\n"
-        return line.encode("utf-8")  # simulate byte string like from serial port
-
+    def detect_gesture_speed(self, touch_time):
+        number_of_samples = int(self._sampling_frequency * touch_time)
+        wave_values = self.generate_values(number_of_samples)
+        speed = self.detect_speed(wave_values)
+        return speed
+    
+    def detect_speed(self,wave_values):
+        # speed in cm/sec
+        #TODO implement this 
+        return random.randint(0, 7)
+    
     def close(self):
         print("closing simulator data stream")

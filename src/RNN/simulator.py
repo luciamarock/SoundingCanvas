@@ -3,6 +3,8 @@ import datetime
 import random
 import matplotlib.pyplot as plt
 import json
+import sine_waves
+
 
 exhibition_date = datetime.datetime(2025, 8, 18, 16, 11, 00)
 exhibition_start_epoch_time = int(exhibition_date.timestamp())
@@ -16,6 +18,9 @@ MAXIMUM_LISTENING_OF_SOUND = 25
 
 NUMBER_OF_CHANNELS = 4
 SOUNDS_PER_CHANNEL = 8
+
+
+simulator = sine_waves.WavesGenerator()
 
 TOTAL_EXHIBITION_DURATION_SECONDS = SECONDS_IN_HOUR * HOUR_OF_EXHIBITION
 elapsed_seconds = 0
@@ -42,7 +47,6 @@ while elapsed_seconds < TOTAL_EXHIBITION_DURATION_SECONDS:
         channel_id = random.randint(0, NUMBER_OF_CHANNELS-1) + 1
         sound_id = random.randint(0, SOUNDS_PER_CHANNEL-1) + 1
         sound_number = (channel_id - 1) * SOUNDS_PER_CHANNEL + sound_id
-        #print(f"touched channel {channel_id} at second {elapsed_seconds}, playing sound {sound_number}")
         event_dict = {}
         event_dict["sound_id"] = prev_sound_id
         prev_sound_id = sound_number
@@ -51,6 +55,10 @@ while elapsed_seconds < TOTAL_EXHIBITION_DURATION_SECONDS:
         event_dict["delta_t"] = prev_pause
         prev_pause = pause 
         elapsed_seconds+=pause 
+        touch_time = pause / random.uniform(2.0, 10.0)
+        average_speed = simulator.detect_gesture_speed(touch_time)
+        event_dict["touch_time"] = touch_time
+        event_dict["average_speed"] = average_speed
         if is_init:
             is_init = False
         else:
