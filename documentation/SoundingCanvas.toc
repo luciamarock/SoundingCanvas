@@ -21,5 +21,8 @@
 \contentsline {paragraph}{Mathematical Formalization}{8}{section*.11}%
 \contentsline {paragraph}{Conceptual Implication}{8}{section*.12}%
 \contentsline {subsection}{\numberline {3.3}Multi-Canvas Networking}{9}{subsection.3.3}%
-\contentsline {section}{\numberline {4}Licensing and Ownership}{9}{section.4}%
-\contentsline {section}{\numberline {5}Exhibitions \& Links}{9}{section.5}%
+\contentsline {subsubsection}{\numberline {3.3.1}Network Architecture}{9}{subsubsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {3.3.2}Impact}{9}{subsubsection.3.3.2}%
+\contentsline {section}{\numberline {4}Distributed Minds}{9}{section.4}%
+\contentsline {section}{\numberline {5}Licensing and Ownership}{9}{section.5}%
+\contentsline {section}{\numberline {6}Exhibitions \& Links}{9}{section.6}%

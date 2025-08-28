@@ -17,7 +17,7 @@
 % macro definitions
 \definecolor{Gray}{gray}{0.95}
 \newcommand\titolo{ Sounding Canvas }
-\newcommand\autore{ \href{https://luciamarock.wixsite.com/home}{Luciano Ciamarone \& Dora Motegh}}
+\newcommand\autore{ \href{https://luciamarock.wixsite.com/home}{Luciano Ciamarone \& Dora Motèque}}
 \newcommand\versione{ \textbf{Ver.} 1.0 }
 % header and footer definitions
 \title{\titolo} 
@@ -239,29 +239,29 @@ This mathematical transformation is not merely a computational trick—it serves
 In this sense, the transformation $\mathbf{y} = T \mathbf{x}$ mirrors the artistic goal: to offer a perceptual and cognitive shift, unveiling hidden correlations and resonances between visual composition and sonic experience.
 
 \subsection{Multi-Canvas Networking}
-A defining feature of the \textit{Sounding Canvas} project is its capacity to function not only as a standalone interactive artwork but as part of a distributed network of canvases. Each canvas, while physically independent and potentially separated by vast geographic distances, remains virtually connected through a centralized server. This interconnection enables novel forms of artistic dialogue, real-time data exchange, and synchronized sonic responses between installations. \newline 
+A defining feature of the \textit{Sounding Canvas} project is its capacity to function not only as a standalone interactive artwork but as part of a distributed network of canvases. Each canvas, while physically independent and potentially separated by vast geographic distances, remains virtually connected through a centralized server. This interconnection enables novel forms of artistic dialogue, real-time data exchange, and synchronized sonic responses between installations.
+\subsubsection{Network Architecture}
 The communication architecture follows a server-centric model. Every canvas establishes a persistent WebSocket connection with a central server deployed on the internet. This server acts as a message broker, coordinating and relaying interaction data between canvases. For example, a touch interaction on one canvas can be captured locally, encoded, and transmitted to the server, which then routes this data to one or more remote canvases. These remote units, upon receiving the signal, can generate corresponding sonic or visual responses, thus establishing a sense of telepresence and remote co-authorship. \newline
-Each canvas is identified by a unique \texttt{client\_id}, allowing the server to maintain a registry of active canvases. The server supports bi-directional communication, enabling both broadcasting and targeted messaging between nodes. This allows for diverse interaction models: from one-to-many synchronization (e.g., triggering a shared harmonic gesture across all canvases), to one-to-one private interactions (e.g., initiating a musical motif in response to a specific remote canvas). \newline
+Each canvas is identified by a unique \texttt{client\_id}, allowing the server to maintain a registry of active canvases. The server supports bi-directional communication, enabling both broadcasting and targeted messaging between nodes. This allows for diverse interaction models: from one-to-many synchronization (e.g., triggering a shared harmonic gesture across all canvases), to one-to-one private interactions (e.g., initiating a musical motif in response to a specific remote canvas).
+\subsubsection{Impact}
 Beyond the technical framework, the impact of this networked approach is fundamentally human. By turning abstract touch into sound, and transmitting that sound across distance, the system fosters a form of emotional presence. Imagine a mother in one country gently interacting with her canvas and triggering a soundscape in her child's room thousands of kilometers away. Without words or screens, a subtle gesture becomes a shared, intimate experience—transcending physical separation and evoking presence through art.
 
+\section{Distributed Minds}
 
 \section{Licensing and Ownership}
-\textit{Sounding Canvas} © 2024 by Luciano Ciamarone and Dora Motegh is licensed under the \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.
+\textit{Sounding Canvas} © 2024 by Luciano Ciamarone and Dora Motèque is licensed under the \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.
 \newline
 This license allows others to remix, adapt, and build upon the work non-commercially, provided they give appropriate credit to the original creator and license their new creations under the same terms. Commercial use is not permitted without explicit permission.
 \newline
 For source code and related resources, please visit the GitHub repository at \href{https://github.com/luciamarock/SoundingCanvas}{github.com/luciamarock/SoundingCanvas}.  
 To learn more about the author and the broader context of this work, visit \href{https://luciamarock.github.io/}{luciamarock.github.io}. \newline 
-This work has been entirely conceived, implemented, and authored by Luciano Ciamarone and Dora Motegh. \newline 
+This work has been entirely conceived, implemented, and authored by Luciano Ciamarone and Dora Motèque. \newline 
 All conceptual and technical contributions presented herein are original unless explicitly referenced.
 
 
 \section{Exhibitions \& Links}
-Past installations and exhibitions (updated until the date of this document):
-\begin{itemize}
-	\item Ca l’Isidret, Barcelona (2025), from  April 8, to Jun 2
-	\item MORPHOS – Temporary Identities 2025, Palazzo Albrizzi-Capello, Venice - April 24 to May 09
-\end{itemize}
+Past and Upcoming installations and exhibitions are listed in the "SoundingCanvas news page" listed at the end of the following links section. \newline
+\newline
 Links: 
 \begin{itemize}
 	\item \href{https://doramoteque-faf94c.webflow.io/}{Dora's Website}
@@ -273,15 +273,15 @@ Links:
 \newpage
 \begin{thebibliography}{References}
 	\bibitem{ballet}
-	Luciano Ciamarone \& Dora Motegh. 
+	Luciano Ciamarone \& Dora Motèque. 
 	\textit{Feedback Ballet}.  
 	Available at: \url{https://luciamarock.github.io/Projects/technicalities/feedback_ballet.html}  	
 	
 	\bibitem{accrocco_paper} 
-	Ciamarone, Motegh, Di Donato,
+	Ciamarone, Motèque, Di Donato,
 	\textit{An Interactive Audio Scenography for Dance Performance}.  
 	Independent Research, Rome; Academy of Fine Arts, Frosinone; Goldsmiths, University of London.  
-	\texttt{luciano.ciamarone@libero.it}, \texttt{negar.motegh@gmail.com}, \texttt{b.didonato@gold.ac.uk}.
+	\texttt{luciano.ciamarone@libero.it}, \texttt{doradynamicdesign@gmail.com}, \texttt{b.didonato@gold.ac.uk}.
 	
 	\bibitem{dastgah_markov}
 	Luciano Ciamarone, Baris Bozkurt, and Xavier Serra. 
