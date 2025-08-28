@@ -25,4 +25,4 @@
 \contentsline {subsubsection}{\numberline {3.3.2}Impact}{9}{subsubsection.3.3.2}%
 \contentsline {section}{\numberline {4}Distributed Minds}{9}{section.4}%
 \contentsline {section}{\numberline {5}Licensing and Ownership}{9}{section.5}%
-\contentsline {section}{\numberline {6}Exhibitions \& Links}{9}{section.6}%
+\contentsline {section}{\numberline {6}Exhibitions \& Links}{10}{section.6}%
