@@ -41,7 +41,7 @@ Follow these steps sequentially to train your model and predict sound features.
 
 ### 1. Extract Image Features (Manual Step / Assumed Pre-existing)
 
-This step involves extracting deep features from your training images using a pre-trained Convolutional Neural Network (e.g., ResNet50). While a dedicated Python script for this wasn't explicitly provided in our discussions, it's assumed that you have already processed your images and have a `feature_vectors.csv` file ready.
+This step involves extracting deep features from your training images using a pre-trained Convolutional Neural Network (e.g., ResNet50). Afters using feature_extractor.py, it's assumed that you have processed your images and have a `feature_vectors.csv` file ready.
 
 * **Input:** Image files in the `images/` directory.
 * **Expected Output:** `feature_vectors.csv` (a CSV file where each row is a 2048-dimensional feature vector for an image, indexed by its base filename).
@@ -92,18 +92,4 @@ This script demonstrates how to use the trained `T_matrix.pt` to predict the 10 
     python predict_sound_features.py
     ```
 * **Output:** Prints the 10 predicted, denormalized, and clamped sound feature values directly to your console. These values can then be used by your online sound synthesis algorithms.
-
-## `.gitignore` Configuration
-
-To keep your Git repository clean and avoid tracking generated files, it's highly recommended to add the following lines to your `.gitignore` file:
-
-```gitignore
-# Python bytecode
-__pycache__/
-
-# Generated data files and model weights
-*.csv
-*.json
-*.pt
-```
 
