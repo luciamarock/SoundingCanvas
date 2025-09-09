@@ -22,7 +22,7 @@ Key features include:
 
 - [Tech Webpage](https://luciamarock.github.io/Projects/SoundingCanvas.html)
 - [Art Webpage](https://doramoteque-faf94c.webflow.io/sounding-canvas)
-- [Youtube Videos](https://www.youtube.com/@doradynamicdesign)
+- [Youtube Videos](https://www.youtube.com/@perceptrumduo)
 - [IG Videos](https://www.instagram.com/doramoteque/)
 
 ## Licensing
