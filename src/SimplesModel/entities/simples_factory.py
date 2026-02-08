@@ -15,6 +15,10 @@ class Simple:
         self.idx = idx
         self.neighbors = neighbors  # 6 indices
         self.A0 = A0
+        self.H0 = 0.0
+        # Placeholder curvature attributes for now
+        self.H = 0.0  # mean curvature
+        self.K = 0.0  # Gaussian curvature
 
         # area allocation
         self.area = {
