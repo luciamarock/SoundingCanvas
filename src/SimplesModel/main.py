@@ -1,67 +1,41 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Feb  7 20:03:35 2026
-
-@author: luciamarock
-
 Main program for the Simples lattice model.
+
+This script initializes a 3D lattice of Simples and runs the simulation
+using either deterministic, stochastic, or hybrid updates.
 """
 
-import random
-import numpy as np
-from entities.simples_factory import Simple  # your Simple class
-from workflows.global_dynamic import global_update
+from entities.lattice_factory import SimpleLattice
 
 # -----------------------------
 # Parameters
 # -----------------------------
-N = 10  # lattice size along one axis
-NUM_STEPS = 100
-ALPHA = 0.01  # global update step size
+N = 10           # lattice size along each axis
+NUM_STEPS = 100  # total simulation steps
+ALPHA = 0.01     # step size for curvature/area updates
+GAMMA = 1.0      # surface tension constant
+K = 0.1          # bending rigidity
+BETA = 1.0       # stochastic inverse temperature
+MODE = "hybrid"  # "deterministic", "stochastic", or "hybrid"
 
-def get_neighbors(x, y, z, n_limit):
-    """Helper to find valid 3D lattice neighbors."""
-    neighbors = []
-    for dx, dy, dz in [(-1,0,0), (1,0,0), (0,-1,0), (0,1,0), (0,0,-1), (0,0,1)]:
-        nx, ny, nz = x + dx, y + dy, z + dz
-        if 0 <= nx < n_limit and 0 <= ny < n_limit and 0 <= nz < n_limit:
-            neighbors.append((nx, ny, nz))
-    return neighbors
-
+# -----------------------------
+# Simulation
+# -----------------------------
 def run_simulation():
-    """
-    Encapsulates the simulation logic so it doesn't run automatically 
-    when the file is imported (e.g., by Sphinx).
-    """
-    # 1. Initialize lattice
-    simples_network = np.empty((N, N, N), dtype=object)
-    
-    # Initial pass to create objects
-    for x in range(N):
-        for y in range(N):
-            for z in range(N):
-                # Placeholder neighbors until second pass
-                simples_network[x, y, z] = Simple(z, [], 1)
+    print(f"Initializing {N}x{N}x{N} lattice of Simples...")
+    lattice = SimpleLattice(N=N, area=1.0)
 
-    # 2. Assign neighbors
-    for x in range(N):
-        for y in range(N):
-            for z in range(N):
-                idx_neighbors = get_neighbors(x, y, z, N)
-                simples_network[x, y, z].neighbors = [
-                    simples_network[nx, ny, nz] for nx, ny, nz in idx_neighbors
-                ]
-
-    # 3. Main evolution loop
-    print(f"Starting simulation for {NUM_STEPS} steps...")
-    for step in range(NUM_STEPS):
-        # Pick a random Simple
-        # Note: i, j, k are integers here, which avoids the IndexError
-        i, j, k = random.randint(0, N-1), random.randint(0, N-1), random.randint(0, N-1)
-        
-        # Call global update
-        global_update(simples_network.flatten(), alpha=ALPHA)
+    print(f"Running simulation for {NUM_STEPS} steps (mode={MODE})...")
+    lattice.run(
+        steps=NUM_STEPS,
+        alpha=ALPHA,
+        gamma=GAMMA,
+        k=K,
+        beta=BETA,
+        mode=MODE
+    )
 
     print("Simulation complete.")
 
@@ -69,6 +43,4 @@ def run_simulation():
 # Execution Guard
 # -----------------------------
 if __name__ == "__main__":
-    # This block only runs if you execute the script directly.
-    # Sphinx will skip this when generating documentation.
     run_simulation()
