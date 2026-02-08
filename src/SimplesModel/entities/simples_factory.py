@@ -5,6 +5,12 @@
 
 """
 class Simple:
+    """
+    Represents a closed geometric surface (Simple) in the SimplesModel network.
+
+    A Simple stores its surface state and interacts with neighboring Simples
+    via energy-driven geometric rules.
+    """
     def __init__(self, idx, neighbors, A0):
         self.idx = idx
         self.neighbors = neighbors  # 6 indices

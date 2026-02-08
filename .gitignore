@@ -6,4 +6,5 @@ src/AudioSamples
 src/config.json
 src/run.py
 src/sc_helper.py
+src/SimplesModel/docs/
 
