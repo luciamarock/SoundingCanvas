@@ -3,7 +3,7 @@ Module `entities.simples_lattice` defines the `SimpleLattice` class,
 managing a 3D lattice of Simples and performing global energy-driven updates.
 """
 
-from entities.simples import Simple
+from entities.simples_factory import Simple
 from workflows.stochastic_update import stochastic_update
 
 
