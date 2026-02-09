@@ -92,21 +92,25 @@ class SimpleLattice:
 
     def compute_deltas(self, alpha=0.01, gamma=1.0, k=0.1):
         """
-        Compute the variational update (delta H) for each Simple.
-
+        Compute the proposed area redistribution for each Simple based on
+        local energy and interaction with neighbors.
+    
         Parameters
         ----------
-        alpha : float
-            Step size for the update.
-        gamma : float
-            Surface tension constant.
-        k : float
-            Bending rigidity constant.
-
+        simples : list of Simple
+            List of Simple objects in the lattice.
+        alpha : float, optional
+            Step size scaling factor (default 0.01).
+        gamma : float, optional
+            Surface-tension constant (default 1.0).
+        k : float, optional
+            Bending rigidity constant (default 0.1).
+    
         Returns
         -------
-        deltas : list of float
-            Curvature increments for all Simples.
+        deltas : list of dict
+            Each dict maps patch names ('xp','xm','yp','ym','zp','zm','free') to
+            proposed changes in area for that Simple.
         """
         deltas = []
         for s in self.simples:
@@ -146,12 +150,21 @@ class SimpleLattice:
 
     def global_update(self, alpha=0.01, gamma=1.0, k=0.1):
         """
-        Apply a single global energy-driven update step to all Simples.
+        Perform a single global update of all Simples in the lattice.
+    
+        Computes the geometric forces for each Simple, including interactions
+        with neighbors, and updates their state simultaneously.
+    
+        Parameters
+        ----------
+        simples : list of Simple
+            List of Simple objects in the lattice.
+        alpha : float, optional
+            Step size scaling factor (default 0.01).
         """
         deltas = self.compute_deltas(alpha=alpha, gamma=gamma, k=k)
         for s, delta in zip(self.simples, deltas):
             s.apply_update(delta)
-            # TODO: propagate delta to actual area/patch geometry if needed
 
     def run(self, steps=10, alpha=0.01, gamma=1.0, k=0.1, beta=1.0, mode="hybrid"):
         """
