@@ -1,7 +1,7 @@
 env
 src/.spyproject/
 __pycache__/
-
+documentation/LaTex/SoundingCanvas.pdf
 src/AudioSamples
 src/config.json
 src/run.py
