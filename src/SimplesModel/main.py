@@ -18,7 +18,7 @@ ALPHA = 0.01     # step size for curvature/area updates
 GAMMA = 1.0      # surface tension constant
 K = 0.1          # bending rigidity
 BETA = 1.0       # stochastic inverse temperature
-MODE = "hybrid"  # "deterministic", "stochastic", or "hybrid"
+MODE = "deterministic"  # "deterministic", "stochastic", or "hybrid"
 
 # -----------------------------
 # Simulation

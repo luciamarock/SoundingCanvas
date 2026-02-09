@@ -35,14 +35,16 @@ def compute_transition_probabilities(simple, network, beta=1.0):
         dE_local = simple.curvature[patch]
 
         # neighbor interaction energy
-        dE_neighbors = 0.0
         directions = ['xp','xm','yp','ym','zp','zm']
         if patch in directions:
             idx = directions.index(patch)
-            neighbor_idx = simple.neighbors[idx]
-            neighbor = network[neighbor_idx]
-            opposite_patch = directions[idx ^ 1]  # opposite patch
-            dE_neighbors = neighbor.curvature[opposite_patch] - simple.curvature[patch]
+            try:
+                neighbor_idx = simple.neighbors[idx]
+                neighbor = network[neighbor_idx]
+                opposite_patch = directions[idx ^ 1]  # opposite patch
+                dE_neighbors = neighbor.curvature[opposite_patch] - simple.curvature[patch]
+            except:
+                dE_neighbors = 0.0
 
         delta_energies[patch] = -(dE_local + dE_neighbors)  # energy-decreasing directions
 

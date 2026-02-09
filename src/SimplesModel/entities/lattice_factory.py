@@ -64,6 +64,30 @@ class SimpleLattice:
         """
         for simple in self.simples:
             stochastic_update(simple, self.simples, alpha=alpha, beta=beta)
+    
+    
+    def get_opposite_patch(self,patch):
+        """
+        Return the opposite patch name for a given patch.
+    
+        Parameters
+        ----------
+        patch : str
+            One of 'xp','xm','yp','ym','zp','zm','free'.
+    
+        Returns
+        -------
+        str
+            Opposite patch name.
+        """
+        mapping = {
+            'xp': 'xm', 'xm': 'xp',
+            'yp': 'ym', 'ym': 'yp',
+            'zp': 'zm', 'zm': 'zp',
+            'free': 'free'
+        }
+        return mapping.get(patch, 'free')
+
 
 
     def compute_deltas(self, alpha=0.01, gamma=1.0, k=0.1):
@@ -86,24 +110,37 @@ class SimpleLattice:
         """
         deltas = []
         for s in self.simples:
-            # --- Surface tension ---
-            surface_tension = gamma * s.H
+            # Initialize delta dict
+            delta = {patch: 0.0 for patch in s.area}
+            
+            # Surface tension: proportional to mean curvature H
+            for patch in s.area:
+                delta[patch] += gamma * s.curvature[patch]        
 
-            # --- Bending contribution ---
-            laplacian = 0.0
+            # Bending rigidity: discrete Laplacian of curvature
+            for patch in s.area:
+                laplacian = 0.0
+                for j in s.neighbors:
+                    neighbor = self.simples[j]
+                    laplacian += neighbor.curvature[patch] - s.curvature[patch]
+                bending = -2 * k * (laplacian + (s.curvature[patch] - s.H0) *
+                                    (s.curvature[patch]**2 - s.K))
+                delta[patch] += bending
+
+            # Neighbor interaction: energy gradient contribution from shared patches
             for j in s.neighbors:
                 neighbor = self.simples[j]
-                laplacian += (neighbor.H - neighbor.H0) - (s.H - s.H0)
-            bending = -2 * k * (laplacian + (s.H - s.H0) * (s.H**2 - s.K))
+                for patch in s.area:
+                    opposite_patch = self.get_opposite_patch(patch)
+                    # assume a simple quadratic interaction on shared patch
+                    shared_area = min(s.area[patch], neighbor.area[opposite_patch])
+                    diff_curvature = s.curvature[patch] - neighbor.curvature[opposite_patch]
+                    delta[patch] += shared_area * diff_curvature  # energy gradient
 
-            # --- Neighbor coupling (smooth area/curvature) ---
-            coupling = 0.0
-            for j in s.neighbors:
-                neighbor = self.simples[j]
-                coupling += (neighbor.H - s.H)
+            # Scale total delta by alpha
+            for patch in delta:
+                delta[patch] *= alpha
 
-            # Total delta
-            delta = alpha * (surface_tension + bending + coupling)
             deltas.append(delta)
         return deltas
 
@@ -113,7 +150,7 @@ class SimpleLattice:
         """
         deltas = self.compute_deltas(alpha=alpha, gamma=gamma, k=k)
         for s, delta in zip(self.simples, deltas):
-            s.H += delta
+            s.apply_update(delta)
             # TODO: propagate delta to actual area/patch geometry if needed
 
     def run(self, steps=10, alpha=0.01, gamma=1.0, k=0.1, beta=1.0, mode="hybrid"):
