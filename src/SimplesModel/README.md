@@ -57,6 +57,6 @@ The primary goal of `SimplesModel` is to **simulate a network of Simples** as a 
 
 ## References
 
-- [Compositional Framework PDF](https://github.com/luciamarock/SoundingCanvas/blob/development/documentation/conceptual_framework/compositional_framework_20251120.pdf) – Formal description of the Variational Geometric Network Framework.
+- The program documentation is [Available Here](https://luciamarock.github.io/Academics/VariationalFramework/)
 - Luciano Ciamarone – Foundational conceptual notes and derivations for Simples and their interactions.
 
