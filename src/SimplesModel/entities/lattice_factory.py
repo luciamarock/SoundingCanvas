@@ -33,25 +33,34 @@ class SimpleLattice:
         return 0 <= x < self.N and 0 <= y < self.N and 0 <= z < self.N
 
     def _build_lattice(self, area):
-        """Instantiate Simples and wire neighbors."""
+        """Instantiate Simples and wire neighbors with patch-specific keys."""
         # Create all Simples
         for i in range(self.N**3):
             self.simples.append(Simple(idx=i, A0=area))
 
-        # Wire neighbors (6-connectivity)
-        directions = [(-1,0,0),(1,0,0),(0,-1,0),(0,1,0),(0,0,-1),(0,0,1)]
+        # Map directions to patch names
+        dirs = {
+            'xm': (-1, 0, 0), 'xp': (1, 0, 0),
+            'ym': (0, -1, 0), 'yp': (0, 1, 0),
+            'zm': (0, 0, -1), 'zp': (0, 0, 1)
+        }
+
         for x in range(self.N):
             for y in range(self.N):
                 for z in range(self.N):
                     i = self._idx(x, y, z)
-                    simple = self.simples[i]
-                    for dx, dy, dz in directions:
-                        nx, ny, nz = x+dx, y+dy, z+dz
+                    s = self.simples[i]
+                    
+                    # Re-initialize neighbor_instances as a dict for patch-mapping
+                    s.neighbor_instances = {} 
+                    
+                    for patch_name, (dx, dy, dz) in dirs.items():
+                        nx, ny, nz = x + dx, y + dy, z + dz
                         if self._inside(nx, ny, nz):
                             neighbor_idx = self._idx(nx, ny, nz)
-                            neighbor_simple = self.simples[neighbor_idx]
-                            simple.neighbors.append(neighbor_idx)
-                            simple.neighbor_instances.append(neighbor_simple)
+                            s.neighbors.append(neighbor_idx)
+                            # Link the specific patch to the specific neighbor object
+                            s.neighbor_instances[patch_name] = self.simples[neighbor_idx]
     
     def stochastic_step(self, alpha=0.01, beta=1.0):
         """

@@ -1,132 +1,95 @@
 """
-Module `entities.simples` defines the `Simple` class,
-representing a closed geometric surface in the lattice network.
-
-Each Simple interacts with neighbors via energy-driven rules:
-- surface tension
-- bending rigidity
-- neighbor coupling
-- area redistribution (local conservation)
+Module `entities.simples` defines the `Simple` class.
+Handles local area updates and neighbor negotiation for shared walls.
 """
 
 class Simple:
-    """
-    Represents a closed geometric surface (Simple) in the SimplesModel network.
-
-    Attributes
-    ----------
-    idx : int
-        Unique identifier for the Simple.
-    neighbors : list of int
-        Indices of neighboring Simples in the lattice.
-    A0 : float
-        Total area of the Simple.
-    H0 : float
-        Reference mean curvature.
-    H : float
-        Current mean curvature (patch-averaged if needed).
-    K : float
-        Current Gaussian curvature.
-    area : dict
-        Dictionary of area per patch:
-        'xp', 'xm', 'yp', 'ym', 'zp', 'zm', 'free'.
-    curvature : dict
-        Curvature deviations per patch (for local energy and interactions).
-    """
-
     PATCHES = ['xp', 'xm', 'yp', 'ym', 'zp', 'zm', 'free']
+    
+    # Mapping to find which patch on a neighbor corresponds to mine
+    OPPOSITE = {
+        'xp': 'xm', 'xm': 'xp',
+        'yp': 'ym', 'ym': 'yp',
+        'zp': 'zm', 'zm': 'zp',
+        'free': 'free'
+    }
 
     def __init__(self, idx, A0=1.0):
         self.idx = idx
-        self.neighbors = []
-        self.neighbor_instances = []
+        self.neighbors = []  # List of indices
+        self.neighbor_instances = {}  # Map: direction_patch -> Simple instance
         self.A0 = A0
 
         self.H0 = 0.0
         self.H = 0.0
         self.K = 0.0
 
-        # Area per patch
         self.area = {p: 0.0 for p in self.PATCHES}
         self.area['free'] = A0
-
-        # Curvature per patch
         self.curvature = {p: 0.0 for p in self.PATCHES}
-
-    # ------------------------------------------------------------------
-    # Internal mechanics
-    # ------------------------------------------------------------------
-
-    def _redistribution_weights(self):
-        """
-        Compute redistribution weights for internal equilibration.
-
-        Weights are proportional to curvature deviation magnitude.
-        """
-        total = sum(abs(self.curvature[p]) for p in self.PATCHES)
-
-        if total == 0.0:
-            return {p: 1.0 / len(self.PATCHES) for p in self.PATCHES}
-
-        return {p: abs(self.curvature[p]) / total for p in self.PATCHES}
+        
+        # Buffer to store "pushes" or "pulls" from neighbors
+        self.proposal_buffer = {p: 0.0 for p in self.PATCHES}
 
     def _renormalize_area(self):
-        """
-        Enforce total area conservation.
-        """
+        """Enforce total area conservation A0."""
         total_area = sum(self.area.values())
-        if total_area == 0.0:
-            return
-
+        if total_area <= 0: return
+        
         scale = self.A0 / total_area
         for p in self.area:
             self.area[p] *= scale
 
     def _update_mean_curvature(self):
-        """
-        Update mean curvature as patch average.
-        """
+        """Update global H based on patch states."""
         self.H = sum(self.curvature.values()) / len(self.curvature)
 
-    # ------------------------------------------------------------------
-    # Public API --> this is only one possible way in which the surface 
-    # gets redistributed, all the possible ways constitute the vector V
-    # ------------------------------------------------------------------
+    def receive_proposal(self, patch, delta_area):
+        """
+        Called by a neighbor to inform this Simple that the shared 
+        wall area is changing.
+        """
+        self.proposal_buffer[patch] += delta_area
+    
+    def _compute_curvature_change(self,delta_change):
+        #TODO use old self._redistribution_weights() and or total_delta = sum(delta.values()) and or softmax
+        pass
 
     def apply_update(self, delta):
         """
-        Apply an external delta stimulus and redistribute it internally.
-
+        Apply lattice forces and negotiate with neighbors via neighbor_instances.
+        
         Parameters
         ----------
         delta : dict
-            External energy / curvature stimulus per patch.
+            The force vector from the lattice for each patch.
         """
-
-        # Total stimulus magnitude
-        total_delta = sum(delta.values())
-
-        if total_delta == 0.0:
-            return
-
-        # Internal redistribution weights
-        weights = self._redistribution_weights()
-
-        # Convert stimulus into area changes
-        area_changes = {
-            p: weights[p] * total_delta
-            for p in self.PATCHES
-        }
-
-        # Apply area changes
+        # 1. Incorporate proposals from neighbors who have already updated
         for p in self.PATCHES:
-            self.area[p] += area_changes[p]
-            if self.area[p] < 0.0:
+            # If a neighbor pushed a change to our shared wall, apply it first
+            self.area[p] += self.proposal_buffer[p]
+            # Clear buffer after consuming
+            self.proposal_buffer[p] = 0.0
+
+        # 2. Apply the current lattice forces (deltas)
+        for p, change in delta.items():
+            self.area[p] += change
+            self.curvature[p] += self._compute_curvature_change(change)
+            
+            # 3. Negotiation: Inform the neighbor of this change
+            # We use the neighbor_instances map (assumed to be populated by Lattice)
+            if p in self.neighbor_instances and p != 'free':
+                neighbor = self.neighbor_instances[p]
+                opposite = self.OPPOSITE[p]
+                # If I grow my 'xp', my neighbor's 'xm' must grow by the same amount
+                # to maintain the shared interface area.
+                neighbor.receive_proposal(opposite, change)
+
+        # 4. Physical Constraints: Area cannot be negative
+        for p in self.area:
+            if self.area[p] < 0:
                 self.area[p] = 0.0
 
-            # Update curvature proxy
-            self.curvature[p] += area_changes[p]
-
-        # Enforce closure
+        # 5. Closure and Internal Consistency
         self._renormalize_area()
         self._update_mean_curvature()
