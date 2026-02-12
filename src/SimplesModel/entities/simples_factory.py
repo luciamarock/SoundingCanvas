@@ -52,9 +52,35 @@ class Simple:
         self.proposal_buffer[patch] += delta_area
     
     def _compute_curvature_change(self):
-        #TODO use old self._redistribution_weights() and or total_delta = sum(delta.values()) and or softmax
-        # update this once the area is recalculated and before _update_mean_curvature
-        pass
+        """
+        Update patch curvatures based on area redistribution and neighbor states.
+        
+        Curvature is calculated as a combination of:
+          - Local anisotropy (difference between opposite patches)
+          - Mismatch with neighbor interfaces (discrete Laplacian approximation)
+        """
+        for p in self.PATCHES:
+            if p == 'free':
+                # Free surface curvature proportional to total free area fraction
+                self.curvature[p] = self.area[p] / self.A0
+                continue
+    
+            # Opposite patch index
+            opposite = self.OPPOSITE[p]
+    
+            # 1. Local anisotropy: difference between my patch and opposite
+            local_contrib = self.area[p] - self.area[opposite]
+    
+            # 2. Neighbor coupling: sum differences with neighbor's opposite patch
+            neighbor_contrib = 0.0
+            if p in self.neighbor_instances:
+                neighbor = self.neighbor_instances[p]
+                neighbor_opposite_area = neighbor.area[opposite]
+                neighbor_contrib = self.area[p] - neighbor_opposite_area
+    
+            # 3. Total curvature (weighted sum)
+            self.curvature[p] = 0.5 * local_contrib + 0.5 * neighbor_contrib
+
 
     def apply_update(self, delta):
         """
