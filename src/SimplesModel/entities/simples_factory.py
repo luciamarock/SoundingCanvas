@@ -20,9 +20,9 @@ class Simple:
         self.neighbor_instances = {}  # Map: direction_patch -> Simple instance
         self.A0 = A0
 
-        self.H0 = 0.0
-        self.H = 0.0
-        self.K = 0.0
+        self.H0 = 0.0 # Reference Curvature
+        self.H = 0.0 # Mean Curvature
+        self.K = 0.0 # Gaussian Curvature
 
         self.area = {p: 0.0 for p in self.PATCHES}
         self.area['free'] = A0
@@ -51,8 +51,9 @@ class Simple:
         """
         self.proposal_buffer[patch] += delta_area
     
-    def _compute_curvature_change(self,delta_change):
+    def _compute_curvature_change(self):
         #TODO use old self._redistribution_weights() and or total_delta = sum(delta.values()) and or softmax
+        # update this once the area is recalculated and before _update_mean_curvature
         pass
 
     def apply_update(self, delta):
@@ -74,7 +75,6 @@ class Simple:
         # 2. Apply the current lattice forces (deltas)
         for p, change in delta.items():
             self.area[p] += change
-            self.curvature[p] += self._compute_curvature_change(change)
             
             # 3. Negotiation: Inform the neighbor of this change
             # We use the neighbor_instances map (assumed to be populated by Lattice)
@@ -92,4 +92,5 @@ class Simple:
 
         # 5. Closure and Internal Consistency
         self._renormalize_area()
+        self._compute_curvature_change()
         self._update_mean_curvature()
