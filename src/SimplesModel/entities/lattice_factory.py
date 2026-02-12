@@ -36,7 +36,7 @@ class SimpleLattice:
         """Instantiate Simples and wire neighbors."""
         # Create all Simples
         for i in range(self.N**3):
-            self.simples.append(Simple(idx=i, neighbors=[], A0=area))
+            self.simples.append(Simple(idx=i, A0=area))
 
         # Wire neighbors (6-connectivity)
         directions = [(-1,0,0),(1,0,0),(0,-1,0),(0,1,0),(0,0,-1),(0,0,1)]
@@ -49,7 +49,9 @@ class SimpleLattice:
                         nx, ny, nz = x+dx, y+dy, z+dz
                         if self._inside(nx, ny, nz):
                             neighbor_idx = self._idx(nx, ny, nz)
+                            neighbor_simple = self.simples[neighbor_idx]
                             simple.neighbors.append(neighbor_idx)
+                            simple.neighbor_instances.append(neighbor_simple)
     
     def stochastic_step(self, alpha=0.01, beta=1.0):
         """

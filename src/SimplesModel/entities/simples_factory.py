@@ -36,9 +36,10 @@ class Simple:
 
     PATCHES = ['xp', 'xm', 'yp', 'ym', 'zp', 'zm', 'free']
 
-    def __init__(self, idx, neighbors=None, A0=1.0):
+    def __init__(self, idx, A0=1.0):
         self.idx = idx
-        self.neighbors = neighbors or []
+        self.neighbors = []
+        self.neighbor_instances = []
         self.A0 = A0
 
         self.H0 = 0.0
