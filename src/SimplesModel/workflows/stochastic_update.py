@@ -12,6 +12,9 @@ def compute_transition_probabilities(simple, network, beta=1.0):
     """
     Compute the transition probability vector for a Simple based on local
     and neighbor curvature (energy gradients).
+    OBSERVATION: Patches with more negative neighbor curvature tend to have 
+    higher delta_energies after negation, which makes them more likely to be 
+    selected in the stochastic update (after softmax).
 
     Parameters
     ----------
@@ -51,6 +54,7 @@ def compute_transition_probabilities(simple, network, beta=1.0):
     # Convert to probabilities via softmax (stochastic selection)
     values = np.array(list(delta_energies.values()))
     # exponentiate with beta controlling randomness
+    # lower betas more uniform probability distribution
     exp_vals = np.exp(beta * values)
     probs = exp_vals / np.sum(exp_vals)
 

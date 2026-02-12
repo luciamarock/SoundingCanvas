@@ -88,7 +88,8 @@ class Simple:
         self.H = sum(self.curvature.values()) / len(self.curvature)
 
     # ------------------------------------------------------------------
-    # Public API
+    # Public API --> this is only one possible way in which the surface 
+    # gets redistributed, all the possible ways constitute the vector V
     # ------------------------------------------------------------------
 
     def apply_update(self, delta):
