@@ -2,6 +2,7 @@
 Module `entities.simples` defines the `Simple` class.
 Handles local area updates and neighbor negotiation for shared walls.
 """
+import numpy as np 
 
 class Simple:
     PATCHES = ['xp', 'xm', 'yp', 'ym', 'zp', 'zm', 'free']
@@ -19,6 +20,7 @@ class Simple:
         self.neighbors = []  # List of indices
         self.neighbor_instances = {}  # Map: direction_patch -> Simple instance
         self.A0 = A0
+        self._beta = 1.0
 
         self.H0 = 0.0 # Reference Curvature
         self.H = 0.0 # Mean Curvature
@@ -39,10 +41,35 @@ class Simple:
         scale = self.A0 / total_area
         for p in self.area:
             self.area[p] *= scale
-
-    def _update_mean_curvature(self):
-        """Update global H based on patch states."""
+    
+    def _enforce_H_K_constraint(self):
+        """
+        Adjust patch curvatures to satisfy a geometric constraint linking
+        mean curvature H and Gaussian curvature K.
+        
+        Currently uses a simple normalization: H^2 >= K
+        """
         self.H = sum(self.curvature.values()) / len(self.curvature)
+        
+        # Approximate K: product of non-free patch curvatures
+        non_free = [p for p in self.PATCHES if p != 'free']
+        K = 1.0
+        for p in non_free:
+            K *= self.curvature[p]
+        self.K = K  # store for reference
+    
+        # Constraint: H^2 >= K
+        if self.H**2 < K:
+            # Scale all curvatures proportionally to satisfy constraint
+            scale = (self.H**2 / K) ** (1.0 / len(non_free))
+            for p in non_free:
+                self.curvature[p] *= scale
+            # Recompute K after scaling
+            K_new = 1.0
+            for p in non_free:
+                K_new *= self.curvature[p]
+            self.K = K_new
+
 
     def receive_proposal(self, patch, delta_area):
         """
@@ -51,6 +78,12 @@ class Simple:
         """
         self.proposal_buffer[patch] += delta_area
     
+    def _softmax(self, x):
+        x = np.array(x, dtype=float)
+        x = x - np.max(x)  # numerical stability
+        exp_x = np.exp(x / self._beta)
+        return exp_x / np.sum(exp_x)
+
     def _compute_curvature_change(self):
         """
         Update patch curvatures based on area redistribution and neighbor states.
@@ -70,19 +103,26 @@ class Simple:
     
             # 1. Local anisotropy: difference between my patch and opposite
             local_contrib = self.area[p] - self.area[opposite]
+            
+            candidates = [local_contrib]
     
             # 2. Neighbor coupling: sum differences with neighbor's opposite patch
-            neighbor_contrib = 0.0
+            neighbor_contrib = 0.0 
             if p in self.neighbor_instances:
                 neighbor = self.neighbor_instances[p]
                 neighbor_opposite_area = neighbor.area[opposite]
                 neighbor_contrib = self.area[p] - neighbor_opposite_area
+                
+                candidates.append(neighbor_contrib)
     
-            # 3. Total curvature (weighted sum)
-            self.curvature[p] = 0.5 * local_contrib + 0.5 * neighbor_contrib
+            # --- Softmax selection ---
+            probabilities = self._softmax(candidates)
+            chosen_index = np.random.choice(len(candidates), p=probabilities)
+            self.curvature[p] = candidates[chosen_index]
+            #self.curvature[p] = 0.5 * local_contrib + 0.5 * neighbor_contrib
 
 
-    def apply_update(self, delta):
+    def apply_update(self, delta,beta):
         """
         Apply lattice forces and negotiate with neighbors via neighbor_instances.
         
@@ -91,6 +131,7 @@ class Simple:
         delta : dict
             The force vector from the lattice for each patch.
         """
+        self._beta = beta
         # 1. Incorporate proposals from neighbors who have already updated
         for p in self.PATCHES:
             # If a neighbor pushed a change to our shared wall, apply it first
@@ -119,4 +160,4 @@ class Simple:
         # 5. Closure and Internal Consistency
         self._renormalize_area()
         self._compute_curvature_change()
-        self._update_mean_curvature()
+        self._enforce_H_K_constraint()

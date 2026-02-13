@@ -159,7 +159,7 @@ class SimpleLattice:
             deltas.append(delta)
         return deltas
 
-    def global_update(self, alpha=0.01, gamma=1.0, k=0.1):
+    def global_update(self, alpha=0.01, beta=1.0, gamma=1.0, k=0.1):
         """
         Perform a single global update of all Simples in the lattice.
     
@@ -175,7 +175,7 @@ class SimpleLattice:
         """
         deltas = self.compute_deltas(alpha=alpha, gamma=gamma, k=k)
         for s, delta in zip(self.simples, deltas):
-            s.apply_update(delta)
+            s.apply_update(delta,beta)
 
     def run(self, steps=10, alpha=0.01, gamma=1.0, k=0.1, beta=1.0, mode="hybrid"):
         """
@@ -190,7 +190,7 @@ class SimpleLattice:
         """
         for step in range(steps):
             if mode in ("deterministic", "hybrid"):
-                self.global_update(alpha=alpha, gamma=gamma, k=k)
+                self.global_update(alpha=alpha, beta=beta, gamma=gamma, k=k)
             if mode in ("stochastic", "hybrid"):
                 self.stochastic_step(alpha=alpha, beta=beta)
 
