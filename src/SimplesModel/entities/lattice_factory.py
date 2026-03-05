@@ -177,7 +177,7 @@ class SimpleLattice:
         for s, delta in zip(self.simples, deltas):
             s.apply_update(delta,beta)
 
-    def run(self, steps=10, alpha=0.01, gamma=1.0, k=0.1, beta=1.0, mode="hybrid"):
+    def run(self, steps=10, alpha=0.01, gamma=1.0, k=0.1, beta=1.0, mode="hybrid",event={}):
         """
         Run the simulation for multiple steps.
     
@@ -188,9 +188,11 @@ class SimpleLattice:
         mode : str
             "deterministic", "stochastic", or "hybrid".
         """
+        self.simples[event["idx"]].accept_perturbation(event["change"])
         for step in range(steps):
             if mode in ("deterministic", "hybrid"):
                 self.global_update(alpha=alpha, beta=beta, gamma=gamma, k=k)
             if mode in ("stochastic", "hybrid"):
                 self.stochastic_step(alpha=alpha, beta=beta)
+        return self.simples[event["idx"]].H
 

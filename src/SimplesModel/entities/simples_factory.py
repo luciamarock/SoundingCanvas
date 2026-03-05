@@ -119,8 +119,11 @@ class Simple:
             probabilities = self._softmax(candidates)
             chosen_index = np.random.choice(len(candidates), p=probabilities)
             self.curvature[p] = candidates[chosen_index]
-            #self.curvature[p] = 0.5 * local_contrib + 0.5 * neighbor_contrib
 
+    def accept_perturbation(self,amount):
+        selected_patch_index = divmod(self.idx,len(self.PATCHES)-1)[1]
+        seleted_patch = self.PATCHES[selected_patch_index]
+        self.proposal_buffer[seleted_patch] = amount
 
     def apply_update(self, delta,beta):
         """
