@@ -21,7 +21,7 @@ Key features include:
 ## Useful Links
 
 - [Tech Webpage](https://luciamarock.github.io/Projects/SoundingCanvas.html)
-- [Art Webpage](https://doramoteque-faf94c.webflow.io/sounding-canvas)
+- [Art Webpage](https://www.perceptrum.net/projects/sounding-canvas-series.html)
 - [Youtube Videos](https://www.youtube.com/@perceptrumduo)
 - [IG Videos](https://www.instagram.com/doramoteque/)
 
