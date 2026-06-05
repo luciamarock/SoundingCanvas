@@ -21,9 +21,9 @@ Key features include:
 ## Useful Links
 
 - [Tech Webpage](https://luciamarock.github.io/Projects/SoundingCanvas.html)
-- [Art Webpage](https://www.perceptrum.net/works/sounding-canvas-series.html)
+- [Art Webpage](https://www.perceptrum.net/works/sounding-canvas.html)
 - [Youtube Videos](https://www.youtube.com/@perceptrumduo)
-- [IG Videos](https://www.instagram.com/doramoteque/)
+- [IG Videos](https://www.instagram.com/perceptrumduo/)
 
 ## Licensing
 
