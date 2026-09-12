@@ -2,7 +2,7 @@
 
 This repository contains the **third version of the Sounding Canvas Event Manager**, a framework for modeling the real-time response of the Sounding Canvas to touch and interaction.
 
-The foundation of this version is based on an idea developed during my **Physics Bachelor's degree**, formalized as a **Variational Geometric Network Framework**. This framework is documented in detail in the [Compositional Framework PDF](https://github.com/luciamarock/SoundingCanvas/blob/development/documentation/compositional_framework.pdf).
+The foundation of this version is based on an idea developed during my **Physics Bachelor's degree**, formalized as a **Variational Geometric Network Framework**. This framework is documented in detail in the [Compositional Framework PDF](https://figshare.com/articles/preprint/Foundational_Framework_for_a_Probabilistic_Spacetime_Ontology/31851979?file=63089977).
 
 ---
 
